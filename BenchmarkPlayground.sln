@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark", "Benchmark\Benchmark.csproj", "{E401A5ED-8933-4C9B-9047-BCF8F70E65DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAppMvc", "WebAppMvc\WebAppMvc.csproj", "{66ED9857-C86C-4784-9012-6F9D52BDC183}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E401A5ED-8933-4C9B-9047-BCF8F70E65DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E401A5ED-8933-4C9B-9047-BCF8F70E65DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E401A5ED-8933-4C9B-9047-BCF8F70E65DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E401A5ED-8933-4C9B-9047-BCF8F70E65DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66ED9857-C86C-4784-9012-6F9D52BDC183}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66ED9857-C86C-4784-9012-6F9D52BDC183}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66ED9857-C86C-4784-9012-6F9D52BDC183}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66ED9857-C86C-4784-9012-6F9D52BDC183}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
