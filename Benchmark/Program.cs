@@ -4,4 +4,6 @@ using WebAppMvc.Benchmarks;
 
 //BenchmarkRunner.Run<ConsoleAppArticleBenchmark>();
 //BenchmarkRunner.Run<ConsoleAppMvcMimicBenchmark>();
-BenchmarkRunner.Run<BenchmarkWebAppMvc>();
+// BenchmarkRunner.Run<BenchmarkWebAppMvc>();
+BenchmarkRunner.Run<JsonConverterBenchmark>();
+
