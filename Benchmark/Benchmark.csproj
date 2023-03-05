@@ -15,4 +15,8 @@
       <ProjectReference Include="..\WebAppMvc\WebAppMvc.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="Benchmarks\JsonConverterBenchmark2.cs" />
+    </ItemGroup>
+
 </Project>

@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Reflection;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using BenchmarkDotNet.Attributes;
 
@@ -10,67 +11,67 @@ public class JsonConverterBenchmark
 {
     private int rows = 100;
     
-    [Benchmark]
-    public int UsedReflection()
-    {
-        int iteration = 0;
-
-        var jsonStringEngine = JsonSerializer.Serialize(
-            new object[]
-                {
-                    new { FormName ="IntegerP", ExternalName = "IntegerProperty"},
-                    new { FormName = "StringP", ExternalName = "StringProperty"},
-                    new { FormName = "DtoCh",  ExternalName = "DtoChild"}
-                });
-
-        var jsonStringForm = JsonSerializer.Serialize(
-            new {
-                Values = new Dictionary<string, object>
-                {
-                    {"IntegerP", 1 },
-                    {"StringP", "test" },
-                    {"DtoCh", new { IntegerProperty = 2, StringProperty = "testChild"}}
-                }
-            });
-        
-        for (int i = 0; i < rows; i++)
-        {
-            var externalValues = JsonSerializer.Deserialize<object[]>(jsonStringEngine);
-            var formValues = JsonSerializer.Deserialize<FormValues>(jsonStringForm);
-
-            var dto = new Dto();
-
-            foreach (JsonElement jsonElementEngine in externalValues)
-            {
-                var externalName = jsonElementEngine.GetProperty("ExternalName").GetString();
-                var formName = jsonElementEngine.GetProperty("FormName").GetString();
-                
-                if (externalName == "IntegerProperty")
-                {
-                    var jsonValue = (JsonElement) formValues.Values.FirstOrDefault(x => x.Key == formName).Value;
-                    typeof(Dto).GetProperty(externalName).SetValue(dto, jsonValue.GetInt32());
-                }
-                
-                if (externalName == "StringProperty")
-                {
-                    var jsonValue = (JsonElement) formValues.Values.FirstOrDefault(x => x.Key == formName).Value;
-                    typeof(Dto).GetProperty(externalName).SetValue(dto, jsonValue.GetString());
-                }
-                
-                if (externalName == "DtoChild")
-                {
-                    var jsonValue = ((JsonElement) formValues.Values.FirstOrDefault(x => x.Key == formName).Value).GetRawText();
-                    var jsonObjectValue = JsonSerializer.Deserialize<DtoChild>(jsonValue);
-                    typeof(Dto).GetProperty(externalName).SetValue(dto, jsonObjectValue);
-                }
-
-            }
-
-            iteration++;
-        }
-
-        return iteration;
-    }
+    // [Benchmark]
+    // public int UsedReflection()
+    // {
+    //     int iteration = 0;
+    //
+    //     var jsonStringEngine = JsonSerializer.Serialize(
+    //         new object[]
+    //             {
+    //                 new { FormName ="IntegerP", ExternalName = "IntegerProperty"},
+    //                 new { FormName = "StringP", ExternalName = "StringProperty"},
+    //                 new { FormName = "DtoCh",  ExternalName = "DtoChild"}
+    //             });
+    //
+    //     var jsonStringForm = JsonSerializer.Serialize(
+    //         new {
+    //             Values = new Dictionary<string, object>
+    //             {
+    //                 {"IntegerP", 1 },
+    //                 {"StringP", "test" },
+    //                 {"DtoCh", new { IntegerProperty = 2, StringProperty = "testChild"}}
+    //             }
+    //         });
+    //     
+    //     for (int i = 0; i < rows; i++)
+    //     {
+    //         var externalValues = JsonSerializer.Deserialize<object[]>(jsonStringEngine);
+    //         var formValues = JsonSerializer.Deserialize<FormValues>(jsonStringForm);
+    //
+    //         var dto = new Dto();
+    //
+    //         foreach (JsonElement jsonElementEngine in externalValues)
+    //         {
+    //             var externalName = jsonElementEngine.GetProperty("ExternalName").GetString();
+    //             var formName = jsonElementEngine.GetProperty("FormName").GetString();
+    //             
+    //             if (externalName == "IntegerProperty")
+    //             {
+    //                 var jsonValue = (JsonElement) formValues.Values.FirstOrDefault(x => x.Key == formName).Value;
+    //                 typeof(Dto).GetProperty(externalName).SetValue(dto, jsonValue.GetInt32());
+    //             }
+    //             
+    //             if (externalName == "StringProperty")
+    //             {
+    //                 var jsonValue = (JsonElement) formValues.Values.FirstOrDefault(x => x.Key == formName).Value;
+    //                 typeof(Dto).GetProperty(externalName).SetValue(dto, jsonValue.GetString());
+    //             }
+    //             
+    //             if (externalName == "DtoChild")
+    //             {
+    //                 var jsonValue = ((JsonElement) formValues.Values.FirstOrDefault(x => x.Key == formName).Value).GetRawText();
+    //                 var jsonObjectValue = JsonSerializer.Deserialize<DtoChild>(jsonValue);
+    //                 typeof(Dto).GetProperty(externalName).SetValue(dto, jsonObjectValue);
+    //             }
+    //
+    //         }
+    //
+    //         iteration++;
+    //     }
+    //
+    //     return iteration;
+    // }
     
     [Benchmark]
     public int UsedTypedEngineDeserialization()
@@ -87,25 +88,24 @@ public class JsonConverterBenchmark
 
         var jsonStringForm = JsonSerializer.Serialize(
             new {
+                Field = "testField",
                 Values = new Dictionary<string, object>
                 {
                     {"IntegerP", 1 },
                     {"StringP", "test" },
-                    {"DtoCh", new { IntegerProperty = 2, StringProperty = "testChild"}}
+                    {"DtoCh", new { IntegerProperty = 2, StringProperty = "testChild"}},
+                    {"DtoCh3", new { IntegerProperty = 3, StringProperty = "testChild3"}}
                 }
             });
         
-        for (int i = 0; i < rows; i++)
-        {
+        // for (int i = 0; i < rows; i++)
+        // {
             var engineValues = JsonSerializer.Deserialize<EngineResponse[]>(jsonStringEngine);
             
-            var options = new JsonSerializerOptions();
-            options.WriteIndented = true;
-            options.Converters.Add(new FieldJsonConverter());
-            var formValues = JsonSerializer.Deserialize<Field[]>(jsonStringForm, options);
+            var fileds = JsonSerializer.Deserialize<FormValues>(jsonStringForm);
 
             var dto = new Dto();
-
+            
             foreach (EngineResponse jsonElementEngine in engineValues)
             {
                 var externalName = jsonElementEngine.ExternalName;
@@ -113,25 +113,25 @@ public class JsonConverterBenchmark
                 
                 if (externalName == "IntegerProperty")
                 {
-                    var jsonValue = formValues.FirstOrDefault(x => x.Name == formName).Value;
+                    var jsonValue = fileds.Values.FirstOrDefault(x => x.Name == formName).Value;
                     typeof(Dto).GetProperty(externalName).SetValue(dto, (int) jsonValue);
                 }
                 
                 if (externalName == "StringProperty")
                 {
-                    var jsonValue = formValues.FirstOrDefault(x => x.Name == formName).Value;
+                    var jsonValue = fileds.Values.FirstOrDefault(x => x.Name == formName).Value;
                     typeof(Dto).GetProperty(externalName).SetValue(dto, (string) jsonValue);
                 }
                 
                 if (externalName == "DtoChild")
                 {
-                    var jsonValue = formValues.FirstOrDefault(x => x.Name == formName).Value;
-                    typeof(Dto).GetProperty(externalName).SetValue(dto, (DtoChild) jsonValue);
+                    var jsonValue = fileds.Values.FirstOrDefault(x => x.Name == formName).Value;
+                    typeof(Dto).GetProperty(externalName, BindingFlags.IgnoreCase).SetValue(dto, (DtoChild) jsonValue);
                 }
             }
 
-            iteration++;
-        }
+        //     iteration++;
+        // }
 
         return iteration;
     }
@@ -150,59 +150,54 @@ public class FieldJsonConverter : JsonConverter<Field[]>
         }
         
         var fields = new List<Field>();
-
-        reader.Read();
-        reader.Read();
+        var startDepth = reader.CurrentDepth;
         
         while (reader.Read())
         {
-
-            string? key = reader.GetString();
-            reader.Read();
-
-            var field = new Field { Name = key};
-            
-            switch (reader.TokenType)
+            if (reader.TokenType == JsonTokenType.EndObject && reader.CurrentDepth == startDepth)
             {
-                case JsonTokenType.Number: 
-                    field.Value = reader.GetInt32();
-                    fields.Add(field);
-                    break;
-                case JsonTokenType.String: 
-                    field.Value = reader.GetString();
-                    fields.Add(field);
-                    break;
-                case JsonTokenType.StartObject:
-                {
-                    //simple object reader
-                    reader.Read();
-                    var firstObjPropertyName = reader.GetString();
-                    if (firstObjPropertyName == "IntegerProperty")
-                    {
-                        var dtoChild = new DtoChild();
-                        reader.Read();
-                        dtoChild.IntegerProperty = reader.GetInt32();
-                        reader.Read();
-                        reader.Read();
-                        dtoChild.StringProperty = reader.GetString();
+                return fields.ToArray();
+            }
 
-                        field.Value = dtoChild;
-                        fields.Add(field);
-                        
-                        //read to the end to prevent exception
-                        while (reader.Read())
-                        {
-                            
-                        }
-                        return fields.ToArray();
-                        
+            if (reader.TokenType == JsonTokenType.PropertyName)
+            {
+                var key = reader.GetString();
+                reader.Read();
+                var field = new Field { Name = key! };
+
+                switch (reader.TokenType)
+                {
+                    case JsonTokenType.Number:
+                    {
+                        field.Value = reader.GetInt32();
+                        break;
                     }
-                    
-                    break;
+                    case JsonTokenType.String:
+                    {
+                        field.Value = reader.GetString()!;
+                        break;
+                    }
+                    case JsonTokenType.StartObject:
+                    {
+                        switch (key)
+                        {
+                            case "DtoCh":
+                            {
+                                field.Value = JsonSerializer.Deserialize<DtoChild>(ref reader)!;
+                                break;
+                            }
+                            case "DtoCh3":
+                            {
+                                field.Value = JsonSerializer.Deserialize<DtoChild>(ref reader)!;
+                                break;
+                            }
+                        }
+                        break;
+                    }
                 }
+                fields.Add(field);
             }
         }
-
         throw new JsonException();
     }
 
@@ -233,7 +228,10 @@ public class DtoChild
 
 public class FormValues
 {
-    public IDictionary<string, object> Values { get; set; }
+    public string Field { get; set; }
+
+    [JsonConverter(typeof(FieldJsonConverter))]
+    public Field[] Values { get; set; }
 }
 
 public class Field
